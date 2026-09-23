@@ -27,7 +27,7 @@ test.afterEach(() => {
 
 test('mouse: a full round by drag, with a wrong drop and a drop outside', async ({ page }) => {
   await page.clock.install();
-  await page.goto('/');
+  await page.goto('./');
   await openSort(page);
   await expect(page.locator('.seg button[data-range="36"]')).toHaveAttribute('aria-pressed', 'true');
   await expect(page.locator('#clock')).toHaveText('0:00');
@@ -86,7 +86,7 @@ test('mouse: a full round by drag, with a wrong drop and a drop outside', async 
 });
 
 test('keyboard only: a full round by Tab and Enter', async ({ page }) => {
-  await page.goto('/');
+  await page.goto('./');
   // Tab to the Family sort picker button (6th game).
   for (let i = 0; i < 6; i++) await page.keyboard.press('Tab');
   await expect(page.locator('.mode[data-game="familySort"]')).toBeFocused();
@@ -128,7 +128,7 @@ test('keyboard only: a full round by Tab and Enter', async ({ page }) => {
 });
 
 test('tap-to-place with the mouse: click a tile, then a bucket', async ({ page }) => {
-  await page.goto('/');
+  await page.goto('./');
   await openSort(page);
   const [z] = (await trayZs(page)) as [number];
   await bucket(page, familyOf(z)).click();
@@ -144,7 +144,7 @@ test('tap-to-place with the mouse: click a tile, then a bucket', async ({ page }
 });
 
 test('tray tiles are neutral; a placed tile takes its family color', async ({ page }) => {
-  await page.goto('/');
+  await page.goto('./');
   await openSort(page);
   const neutral = await tokenColor(page, '--tile-neutral');
   const zs = await trayZs(page);
@@ -163,7 +163,7 @@ test('tray tiles are neutral; a placed tile takes its family color', async ({ pa
 });
 
 test('buckets: only in-range families, in table order; never Z 104+; range switch restarts', async ({ page }) => {
-  await page.goto('/');
+  await page.goto('./');
   await openSort(page);
   await page.locator('.seg button[data-range="20"]').click();
   expect(await bucketIds(page)).toEqual(['alkali', 'alkaline', 'post', 'metalloid', 'nonmetal', 'halogen', 'noble']);
@@ -189,7 +189,7 @@ test('buckets: only in-range families, in table order; never Z 104+; range switc
 
 test('Family sort works with localStorage throwing', async ({ page }) => {
   await page.addInitScript(BLOCK_STORAGE);
-  await page.goto('/');
+  await page.goto('./');
   await openSort(page);
   for (const z of await trayZs(page)) {
     await mouseDrag(page, trayTile(page, z), bucket(page, familyOf(z)));

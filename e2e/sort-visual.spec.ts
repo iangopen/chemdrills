@@ -16,7 +16,7 @@ for (const scheme of ['light', 'dark'] as const) {
     test(`family sort ${width}px ${scheme}`, async ({ page }) => {
       await page.emulateMedia({ colorScheme: scheme, reducedMotion: 'reduce' });
       await page.setViewportSize({ width, height: width === 375 ? 667 : 900 });
-      await page.goto('/');
+      await page.goto('./');
       await page.evaluate(() => document.fonts.ready);
       await openSort(page);
       await page.locator('.seg button[data-range="118"]').click(); // all 10 buckets: the tightest layout

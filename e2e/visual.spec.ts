@@ -37,7 +37,7 @@ for (const scheme of SCHEMES) {
     test(`layout ${width}px ${scheme}`, async ({ page }) => {
       await page.emulateMedia({ colorScheme: scheme, reducedMotion: 'reduce' });
       await page.setViewportSize({ width, height: 900 });
-      await page.goto('/');
+      await page.goto('./');
       await page.evaluate(() => document.fonts.ready);
 
       // Tile text stays dark ink in both themes.
@@ -94,7 +94,7 @@ for (const scheme of SCHEMES) {
 
 test('data-theme overrides the system scheme', async ({ page }) => {
   await page.emulateMedia({ colorScheme: 'dark' });
-  await page.goto('/');
+  await page.goto('./');
   await page.evaluate(() => document.documentElement.setAttribute('data-theme', 'light'));
   expect(await page.evaluate(() => getComputedStyle(document.body).backgroundColor)).toBe('rgb(230, 236, 238)');
   await page.emulateMedia({ colorScheme: 'light' });
@@ -104,7 +104,7 @@ test('data-theme overrides the system scheme', async ({ page }) => {
 
 test('reduced motion disables the pop animation', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
-  await page.goto('/');
+  await page.goto('./');
   await openGame(page, 'nameAll');
   await page.locator('#nameIn').pressSequentially('helium');
   const anim = await page.locator('#c2').evaluate((el) => getComputedStyle(el).animationName);

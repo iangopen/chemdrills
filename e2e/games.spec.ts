@@ -6,7 +6,7 @@ let errors: string[] = [];
 
 test.beforeEach(async ({ page }) => {
   errors = trackErrors(page);
-  await page.goto('/');
+  await page.goto('./');
 });
 
 test.afterEach(() => {

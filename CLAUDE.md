@@ -21,7 +21,7 @@ Read this file in full at the start of every session. Update the Status section 
 ## Commands
 
 ```
-npm run dev          # local dev server
+npm run dev          # local dev server, at http://localhost:5173/chemdrills/ (note the base path)
 npm run build        # tsc -b (strict) + vite build — must pass with zero errors
 npm test             # Vitest unit tests
 npm run lint         # ESLint
@@ -30,6 +30,29 @@ npm run e2e:install  # one-time: download Playwright's Chromium
 ```
 
 The e2e server uses port **4317** with `reuseExistingServer: false` on purpose: another local project serves on Vite's default 4173, and reusing it silently tests the wrong app. Screenshots land in `test-results/screenshots/` (gitignored).
+
+## Deployment
+
+- **Target: GitHub Pages via GitHub Actions.** Live URL: **https://iangopenbusinessai-lab.github.io/chemdrills/**
+- `.github/workflows/deploy.yml` runs on every push to `main`, and can be rerun by hand (`workflow_dispatch`).
+  - The `build` job: checkout → setup-node (Node from `.nvmrc`, npm cache) → `npm ci` → `npm run build` → configure-pages → upload-pages-artifact (`dist`).
+  - The `deploy` job runs deploy-pages into the `github-pages` environment.
+  - Permissions: `contents: read`, `pages: write`, `id-token: write`. Concurrency group `pages`, with `cancel-in-progress: false`.
+  - Action majors were checked against GitHub's releases on 2026-09-23: checkout@v7, setup-node@v7, configure-pages@v6, upload-pages-artifact@v5, deploy-pages@v5. Re-check (`gh api repos/actions/<name>/releases/latest`) when bumping; don't copy versions from memory.
+  - Validate the workflow with actionlint after any edit.
+- The workflow **requires Settings → Pages → Source = "GitHub Actions"**. Before this session the repo was on the legacy "Deploy from a branch" (`main`, `/`) source, which publishes the raw repo, not the build.
+- `.nvmrc` (`24`) is the single source for the Node version, locally and in CI. `package-lock.json` must stay committed (`npm ci`).
+
+### Base-path rules
+
+The site lives at `/chemdrills/`, not `/`.
+
+1. **`base: '/chemdrills/'` in `vite.config.ts` is unconditional**, for every build: dev, preview, e2e and CI. Never make it depend on an env var. The tests must run against exactly the bundle that ships; a local-only `/` base would let a broken asset path pass every test and then fail live.
+2. **Any hand-built URL** (a `fetch` path, an asset reference, a link, an image `src`, a file in `public/`) uses `import.meta.env.BASE_URL`, e.g. `` `${import.meta.env.BASE_URL}data.json` ``. Never write a root-absolute `'/...'` path. Imported assets (`import x from './x.png'`) and `index.html` references are rewritten by Vite automatically.
+3. **Playwright navigates with relative paths only**: `page.goto('./')`, never `goto('/')`. `baseURL` is `http://localhost:4317/chemdrills/`, and `goto('/')` resolves against the host root and drops `/chemdrills/`.
+   - Note: `vite preview` answers `/` with a 302 to `/chemdrills/`, so `goto('/')` happened to work locally, which hid the problem. GitHub Pages has no such redirect.
+   - `e2e/deploy.spec.ts` asserts the app loads directly (200, no redirect), every same-origin request is under `/chemdrills/` with status < 400, the font loads, and there are no console errors. A mutation check showed it catches a root-absolute `fetch('/elements.json')`.
+4. **No router exists.** If one is added, set its `basename` to `import.meta.env.BASE_URL`, and remember that GitHub Pages returns 404 when a deep route is refreshed. Report that; don't silently add a `404.html` redirect hack.
 
 ## Source of truth
 
@@ -62,7 +85,8 @@ src/
     SortRunner.tsx       plays any SortGame (tray of neutral tiles, buckets, results)
   App.tsx                picker + stage; exhaustive switch on kind; remounts the runner (via key) to restart
   styles/tokens.css, styles/app.css
-e2e/                     Playwright specs: games, storage-blocked, visual, sort, sort-touch, sort-visual
+e2e/                     Playwright specs: games, storage-blocked, visual, sort, sort-touch, sort-visual, deploy
+.github/workflows/deploy.yml   build + deploy to GitHub Pages on push to main
 ```
 
 ### GameDefinition
@@ -228,10 +252,21 @@ Checked by mutation testing:
 5. Screenshots at 375px and 1280px, in light and dark (`e2e/visual.spec.ts`, `e2e/sort-visual.spec.ts`). Check for no horizontal body scroll and family-colored tiles, then **look at the PNGs**.
 6. Any drag change: `e2e/sort-touch.spec.ts` (real CDP touch input) must pass. CDP `touchEnd`/`touchCancel` list the points being **released**, and an empty list releases all of them. This was verified with a probe: listing the finger that should stay down lifts that finger.
 7. Run the whole e2e suite with `--repeat-each=3`, since rounds are random.
+8. Deployment changes:
+   - After `npm run build`, every local `src`/`href` in `dist/index.html` starts with `/chemdrills/`. Only the Google Fonts URLs are external.
+   - `e2e/deploy.spec.ts` passes.
+   - actionlint is clean on `.github/workflows/deploy.yml`.
 
 ## Status
 
 ### Real (verified 2026-09-23)
+- **Deployment setup (local verification only; not yet live, see Open)**:
+  - The workflow is written, and actionlint 1.7.12 reports 0 errors. A negative control with a typo'd runner label and step id was caught, so the linter really checks. ShellCheck isn't installed, so the two one-line `run:` steps weren't shell-linted.
+  - `base: '/chemdrills/'` is set unconditionally. `dist/index.html` references `/chemdrills/assets/*.js` and `*.css`, and the built CSS has no `url()`. Nothing in `src/` builds URLs by hand, and there's no router and no `public/` folder.
+  - Under `vite preview` on 4317, `/chemdrills/` renders with Bricolage Grotesque loaded. All five requests returned 200 (page, CSS, JS, font CSS, font file), with no console messages. The screenshot was reviewed by eye.
+  - The repo is public. Pages was on the legacy branch source when checked, and must be switched to "GitHub Actions".
+  - The existing spec diff is exactly 14 `goto('/')` → `goto('./')` swaps, with 0 other changed lines. All assertions are unchanged.
+  - Unit and e2e suites pass from PowerShell: 46 unit tests, 36 e2e tests, and 108 of 108 across `--repeat-each=3`.
 - **Six games**: the five ported from the prototype (rules, wording and styling matching it), plus Family Sort (the first `sort` kind).
 - **Game model**: `GameDefinition = QuizGame | FillTableGame | SortGame`, with an exhaustive `switch` in `App.tsx`. The five original games behave exactly as before: all 35 original unit tests and 19 original Playwright tests pass **unmodified** (`git diff` on the old test files is empty).
 - **`npm run build`**: zero TS errors under strict + `noUncheckedIndexedAccess`.
@@ -247,7 +282,7 @@ Checked by mutation testing:
     - Placement judging, first-try scoring, mistake counting; a drop outside a bucket isn't a mistake.
     - The best result's tie-break (a faster time wins at an equal score; an equal time doesn't), stored as `{ score, seconds }`.
     - Corrupt or blocked storage.
-- **`npm run e2e`**: 35 Playwright tests pass, 105 of 105 across a `--repeat-each=3` run, from PowerShell.
+- **`npm run e2e`**: 36 Playwright tests pass, 108 of 108 across a `--repeat-each=3` run, from PowerShell. That's the 35 below plus `deploy.spec.ts`, all served under `/chemdrills/`.
   - The original 19:
     - Name Them All: names lock in; typos don't; the clock starts on the first keystroke; time-out and Give up reveal missed cells; the best count is saved.
     - Each quiz: a right and a wrong answer, and a full round with results.
@@ -277,11 +312,15 @@ Checked by mutation testing:
 - **Masses**: all 84 elements with a standard weight match CIAAW 2024 abridged. The 34 synthetic ones were cross-checked against PubChem, with the differences noted above.
 
 ### Open
+- **Live deploy: NOT verified.** The workflow has never run on GitHub, and nothing has been loaded from https://iangopenbusinessai-lab.github.io/chemdrills/. This stays open until the developer confirms the live site loads on their phone. Remaining manual steps:
+  1. Settings → Pages → Source: switch from "Deploy from a branch" to **GitHub Actions**. (The repo is already public.)
+  2. Push `main`.
+  3. Watch the Actions tab: "Deploy to GitHub Pages" should pass both `build` and `deploy`.
+  4. Open the live URL on a phone.
 - **Real devices**: no real phone, tablet or Safari/iOS testing has been done. Touch was tested only through Chromium's CDP touch emulation. iOS Safari's touch/scroll behavior, synthesized-mouse timing, `touch-action` support and sticky positioning are unverified, and so is safe-area padding.
 - **Browsers**: only Chromium is tested. Firefox and WebKit aren't.
 - **Screen readers**: not tested with NVDA or VoiceOver. The aria labels and live regions are written but unheard.
 - **Dev mode**: e2e runs against the production build (`vite preview`). `npm run dev` with React StrictMode isn't exercised by automated tests.
-- **Deployment target**: Vercel or GitHub Pages, undecided.
 - **Accounts or leaderboards**: deliberately out of scope for now.
 - **Roadmap games** (not started, not yet specced; see "How to add a game"):
   - other sort games (e.g. metals / nonmetals / metalloids): should be one file + one line now

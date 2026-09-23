@@ -23,7 +23,7 @@ let cdp: CDPSession;
 
 async function setup(page: Page) {
   errors = trackErrors(page);
-  await page.goto('/');
+  await page.goto('./');
   await openSort(page);
   await scrollTrayToTop(page);
   cdp = await page.context().newCDPSession(page);
@@ -187,7 +187,7 @@ test('e) a short tap selects rather than drags; tap a bucket to place', async ({
 
 test('f) a drag that starts outside the tiles scrolls the page', async ({ page }) => {
   errors = trackErrors(page);
-  await page.goto('/');
+  await page.goto('./');
   await openSort(page);
   cdp = await page.context().newCDPSession(page);
   expect(await page.evaluate(() => window.scrollY)).toBe(0);

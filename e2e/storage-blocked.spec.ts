@@ -6,7 +6,7 @@ import { answer, BLOCK_STORAGE, currentElement, nextQuestion, openGame, trackErr
 test('all games work with localStorage throwing', async ({ page }) => {
   const errors = trackErrors(page);
   await page.addInitScript(BLOCK_STORAGE);
-  await page.goto('/');
+  await page.goto('./');
 
   // Sanity: storage really is blocked in this page.
   const blocked = await page.evaluate(() => {
