@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Element Drills</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#E6ECEE; --ink:#15232C; --muted:#56666F; --panel:#F7FAFB; --line:#C3CFD5;
+  --good:#1D7447; --bad:#B3261E; --focus:#2D5BD7; --tile-ink:#15232C;
+  --f-alkali:#F9B5A7; --f-alkaline:#FAD49A; --f-transition:#B9D3EC; --f-post:#BFE0C4;
+  --f-metalloid:#D7C6EE; --f-nonmetal:#F2EC9B; --f-halogen:#9FE1D6; --f-noble:#F4C2DE;
+  --f-lanthanide:#D9E6A7; --f-actinide:#E7C3A2;
+  --font:"Bricolage Grotesque", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#121C23; --ink:#E4EBEE; --muted:#95A6AF; --panel:#1A262E; --line:#2F3F49;
+    --good:#62CE92; --bad:#FF8A80; --focus:#8FB0FF;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#121C23; --ink:#E4EBEE; --muted:#95A6AF; --panel:#1A262E; --line:#2F3F49;
+  --good:#62CE92; --bad:#FF8A80; --focus:#8FB0FF;
+}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);font-size:17px;line-height:1.45;-webkit-font-smoothing:antialiased}
+main{max-width:1080px;margin:0 auto;padding:32px 20px 64px}
+h1{font-size:clamp(40px,7vw,72px);font-weight:800;letter-spacing:-.03em;line-height:.95;margin:0 0 10px}
+.lede{margin:0 0 28px;color:var(--muted);max-width:52ch}
+button,input{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+
+/* Mode picker: each game is an element cell */
+.modes{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:28px}
+.mode{all:unset;cursor:pointer;width:112px;min-height:112px;border:2px solid var(--ink);border-radius:6px;padding:8px 10px;display:flex;flex-direction:column;justify-content:space-between;background:var(--fam);color:var(--tile-ink);transition:transform .12s}
+.mode:hover{transform:translateY(-2px)}
+.mode:focus-visible{outline:3px solid var(--focus);outline-offset:3px}
+.mode .code{font-size:34px;font-weight:800;line-height:1;letter-spacing:-.02em}
+.mode .lbl{font-size:13.5px;font-weight:600;line-height:1.2}
+.mode[aria-pressed="true"]{box-shadow:0 0 0 3px var(--bg),0 0 0 6px var(--ink)}
+
+.stage{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:24px}
+.bar{display:flex;flex-wrap:wrap;align-items:center;gap:12px 20px;margin-bottom:24px}
+.seg{display:inline-flex;border:1.5px solid var(--line);border-radius:8px;overflow:hidden}
+.seg button{all:unset;cursor:pointer;padding:7px 12px;font-size:15px;color:var(--muted)}
+.seg button+button{border-left:1.5px solid var(--line)}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--panel)}
+.seg button:focus-visible{outline:3px solid var(--focus);outline-offset:-3px}
+.stats{margin-left:auto;display:flex;gap:18px;font-variant-numeric:tabular-nums;color:var(--muted);font-size:15px}
+.stats b{color:var(--ink);font-weight:600}
+
+/* Element tile */
+.tile{--fam:var(--f-nonmetal);background:var(--fam);color:var(--tile-ink);border:2px solid var(--tile-ink);border-radius:6px;display:grid;grid-template-rows:auto 1fr auto auto;width:190px;aspect-ratio:1/1.12;padding:10px 12px;flex:none}
+.t-num{font-size:20px;font-weight:600;font-variant-numeric:tabular-nums}
+.t-sym{font-size:84px;font-weight:800;line-height:1;align-self:center;letter-spacing:-.03em}
+.t-name{font-size:17px;font-weight:600}
+.t-mass{font-size:15px;font-variant-numeric:tabular-nums;min-height:1.2em}
+.hid{opacity:.45}
+
+.prompt{display:flex;gap:32px;align-items:center;flex-wrap:wrap}
+.ask{flex:1;min-width:240px}
+.q{font-size:26px;font-weight:600;margin:0 0 14px;letter-spacing:-.01em}
+.row{display:flex;gap:10px}
+.row input{flex:1;min-width:0;padding:12px 14px;border:2px solid var(--line);border-radius:8px;background:var(--bg);font-size:19px}
+.row input:focus{border-color:var(--ink);outline:none}
+.btn{all:unset;cursor:pointer;padding:12px 18px;border-radius:8px;background:var(--ink);color:var(--panel);font-weight:600;text-align:center}
+.btn.ghost{background:transparent;color:var(--ink);border:2px solid var(--line);padding:10px 16px}
+.btn:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+.fb{min-height:3.2em;margin:14px 0 0;font-size:17px}
+.fb.good{color:var(--good)} .fb.bad{color:var(--bad)}
+.hint{color:var(--muted);font-size:15px;margin:10px 0 0}
+
+.result{text-align:left}
+.result .big{font-size:clamp(44px,8vw,80px);font-weight:800;letter-spacing:-.03em;line-height:1;margin:0 0 8px}
+.misses{display:flex;flex-wrap:wrap;gap:8px;margin:18px 0 22px}
+.misses .tile{width:92px;padding:5px 7px}
+.misses .t-sym{font-size:34px}.misses .t-num{font-size:12px}.misses .t-name{font-size:11px}.misses .t-mass{font-size:10px}
+
+/* Periodic table */
+.tablewrap{overflow-x:auto;padding-bottom:6px}
+.pt{display:grid;grid-template-columns:repeat(18,minmax(38px,1fr));grid-template-rows:repeat(7,auto) 14px auto auto;gap:3px;min-width:720px}
+.cell{aspect-ratio:1/1.1;border:1.5px solid var(--line);border-radius:4px;display:flex;flex-direction:column;padding:2px 4px;font-variant-numeric:tabular-nums;color:var(--muted)}
+.cell .cn{font-size:10px;line-height:1.1}
+.cell .cs{font-size:17px;font-weight:800;line-height:1;margin:auto 0;color:var(--tile-ink)}
+.cell.found{background:var(--fam);border-color:var(--tile-ink);color:var(--tile-ink)}
+.cell.missed{border:2px dashed var(--bad)}
+.cell.missed .cs{color:var(--bad)}
+.cell.pop{animation:pop .35s ease-out}
+@keyframes pop{0%{transform:scale(1.35)}100%{transform:scale(1)}}
+.clock{font-size:28px;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;margin-top:18px;font-size:14px;color:var(--muted)}
+.legend span::before{content:"";display:inline-block;width:12px;height:12px;border-radius:3px;background:var(--sw);border:1px solid var(--tile-ink);margin-right:6px;vertical-align:-1px}
+
+@media (max-width:560px){
+  main{padding:20px 14px 48px}
+  .stage{padding:16px}
+  .mode{width:calc(33.3% - 7px);min-height:96px}
+  .tile{width:150px}.t-sym{font-size:66px}
+  .prompt{gap:18px}
+  .stats{margin-left:0}
+}
+@media (prefers-reduced-motion:reduce){
+  .mode{transition:none}.mode:hover{transform:none}.cell.pop{animation:none}
+}
+</style>
+</head>
+<body>
+<main>
+  <h1>Element Drills</h1>
+  <p class="lede">Five games for learning the periodic table. Pick one to start.</p>
+  <nav class="modes" id="modes" aria-label="Games"></nav>
+  <section class="stage" id="stage" aria-live="polite"></section>
+</main>
+
+<script>
+const RAW=`H Hydrogen 1.008
+He Helium 4.0026
+Li Lithium 6.94
+Be Beryllium 9.0122
+B Boron 10.81
+C Carbon 12.011
+N Nitrogen 14.007
+O Oxygen 15.999
+F Fluorine 18.998
+Ne Neon 20.180
+Na Sodium 22.990
+Mg Magnesium 24.305
+Al Aluminum 26.982
+Si Silicon 28.085
+P Phosphorus 30.974
+S Sulfur 32.06
+Cl Chlorine 35.45
+Ar Argon 39.948
+K Potassium 39.098
+Ca Calcium 40.078
+Sc Scandium 44.956
+Ti Titanium 47.867
+V Vanadium 50.942
+Cr Chromium 51.996
+Mn Manganese 54.938
+Fe Iron 55.845
+Co Cobalt 58.933
+Ni Nickel 58.693
+Cu Copper 63.546
+Zn Zinc 65.38
+Ga Gallium 69.723
+Ge Germanium 72.630
+As Arsenic 74.922
+Se Selenium 78.971
+Br Bromine 79.904
+Kr Krypton 83.798
+Rb Rubidium 85.468
+Sr Strontium 87.62
+Y Yttrium 88.906
+Zr Zirconium 91.224
+Nb Niobium 92.906
+Mo Molybdenum 95.95
+Tc Technetium 98
+Ru Ruthenium 101.07
+Rh Rhodium 102.91
+Pd Palladium 106.42
+Ag Silver 107.87
+Cd Cadmium 112.41
+In Indium 114.82
+Sn Tin 118.71
+Sb Antimony 121.76
+Te Tellurium 127.60
+I Iodine 126.90
+Xe Xenon 131.29
+Cs Cesium 132.91
+Ba Barium 137.33
+La Lanthanum 138.91
+Ce Cerium 140.12
+Pr Praseodymium 140.91
+Nd Neodymium 144.24
+Pm Promethium 145
+Sm Samarium 150.36
+Eu Europium 151.96
+Gd Gadolinium 157.25
+Tb Terbium 158.93
+Dy Dysprosium 162.50
+Ho Holmium 164.93
+Er Erbium 167.26
+Tm Thulium 168.93
+Yb Ytterbium 173.05
+Lu Lutetium 174.97
+Hf Hafnium 178.49
+Ta Tantalum 180.95
+W Tungsten 183.84
+Re Rhenium 186.21
+Os Osmium 190.23
+Ir Iridium 192.22
+Pt Platinum 195.08
+Au Gold 196.97
+Hg Mercury 200.59
+Tl Thallium 204.38
+Pb Lead 207.2
+Bi Bismuth 208.98
+Po Polonium 209
+At Astatine 210
+Rn Radon 222
+Fr Francium 223
+Ra Radium 226
+Ac Actinium 227
+Th Thorium 232.04
+Pa Protactinium 231.04
+U Uranium 238.03
+Np Neptunium 237
+Pu Plutonium 244
+Am Americium 243
+Cm Curium 247
+Bk Berkelium 247
+Cf Californium 251
+Es Einsteinium 252
+Fm Fermium 257
+Md Mendelevium 258
+No Nobelium 259
+Lr Lawrencium 266
+Rf Rutherfordium 267
+Db Dubnium 268
+Sg Seaborgium 269
+Bh Bohrium 270
+Hs Hassium 269
+Mt Meitnerium 278
+Ds Darmstadtium 281
+Rg Roentgenium 282
+Cn Copernicium 285
+Nh Nihonium 286
+Fl Flerovium 289
+Mc Moscovium 290
+Lv Livermorium 293
+Ts Tennessine 294
+Og Oganesson 294`;
+
+const ALT={13:['aluminium'],16:['sulphur'],55:['caesium']};
+const inSet=(z,list)=>list.includes(z);
+const inRange=(z,ranges)=>ranges.some(([a,b])=>z>=a&&z<=b);
+function family(z){
+  if(inSet(z,[3,11,19,37,55,87]))return['alkali','Alkali metal'];
+  if(inSet(z,[4,12,20,38,56,88]))return['alkaline','Alkaline earth metal'];
+  if(z>=57&&z<=71)return['lanthanide','Lanthanide'];
+  if(z>=89&&z<=103)return['actinide','Actinide'];
+  if(inRange(z,[[21,30],[39,48],[72,80],[104,112]]))return['transition','Transition metal'];
+  if(inSet(z,[5,14,32,33,51,52]))return['metalloid','Metalloid'];
+  if(inSet(z,[1,6,7,8,15,16,34]))return['nonmetal','Nonmetal'];
+  if(inSet(z,[9,17,35,53,85,117]))return['halogen','Halogen'];
+  if(inSet(z,[2,10,18,36,54,86,118]))return['noble','Noble gas'];
+  return['post','Post-transition metal'];
+}
+function position(z){
+  if(z===1)return[1,1]; if(z===2)return[1,18];
+  if(z<=4)return[2,z-2]; if(z<=10)return[2,z+8];
+  if(z<=12)return[3,z-10]; if(z<=18)return[3,z];
+  if(z<=36)return[4,z-18]; if(z<=54)return[5,z-36];
+  if(z<=56)return[6,z-54]; if(z<=71)return[9,z-54];
+  if(z<=86)return[6,z-68];
+  if(z<=88)return[7,z-86]; if(z<=103)return[10,z-86];
+  return[7,z-100];
+}
+const EL=RAW.split('\n').map((line,i)=>{
+  const [sym,name,m]=line.split(' '); const z=i+1;
+  const synthetic=z===43||z===61||(z>=84&&![90,91,92].includes(z));
+  return{z,sym,name,mass:parseFloat(m),synthetic,fam:family(z)};
+});
+const massText=e=>e.synthetic?`[${Math.round(e.mass)}]`:String(e.mass);
+const norm=s=>s.toLowerCase().replace(/[^a-z]/g,'');
+function lev(a,b){
+  const d=Array.from({length:a.length+1},(_,i)=>[i]);
+  for(let j=1;j<=b.length;j++)d[0][j]=j;
+  for(let i=1;i<=a.length;i++)for(let j=1;j<=b.length;j++)
+    d[i][j]=Math.min(d[i-1][j]+1,d[i][j-1]+1,d[i-1][j-1]+(a[i-1]===b[j-1]?0:1));
+  return d[a.length][b.length];
+}
+function nameMatch(e,input){
+  const n=norm(input); if(!n)return null;
+  const names=[e.name,...(ALT[e.z]||[])].map(norm);
+  if(names.includes(n))return'exact';
+  if(n.length>=5&&names.some(x=>lev(x,n)<=1))return'close';
+  return null;
+}
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+function tile(e,o={}){
+  const show=k=>o[k]!==false;
+  return `<div class="tile" style="--fam:var(--f-${e.fam[0]})" role="img" aria-label="${show('name')?e.name:'Hidden element'}">
+    <span class="t-num ${show('num')?'':'hid'}">${show('num')?e.z:'?'}</span>
+    <span class="t-sym ${show('sym')?'':'hid'}">${show('sym')?e.sym:'?'}</span>
+    <span class="t-name ${show('name')?'':'hid'}">${show('name')?e.name:'?'}</span>
+    <span class="t-mass ${show('mass')?'':'hid'}">${show('mass')?massText(e):'?'}</span></div>`;
+}
+
+const store={
+  get(k){try{return JSON.parse(localStorage.getItem('eldrills:'+k))}catch(_){return null}},
+  set(k,v){try{localStorage.setItem('eldrills:'+k,JSON.stringify(v))}catch(_){}}
+};
+
+const MODES=[
+  {id:'all',code:'All',label:'Name them all',fam:'noble'},
+  {id:'sym',code:'Sy',label:'Symbol to name',fam:'transition'},
+  {id:'num',code:'Nº',label:'Number to element',fam:'halogen'},
+  {id:'z',code:'Z',label:'Element to number',fam:'alkaline'},
+  {id:'mass',code:'u',label:'Guess the mass',fam:'metalloid'}
+];
+const RANGES=[[20,'1–20'],[36,'1–36'],[54,'1–54'],[118,'All 118']];
+const QUESTIONS=10;
+
+const $=id=>document.getElementById(id);
+const stage=$('stage');
+let current=null, timer=null;
+let range=store.get('range')||36;
+
+function renderModes(){
+  $('modes').innerHTML=MODES.map(m=>`<button class="mode" data-mode="${m.id}" aria-pressed="${current===m.id}" style="--fam:var(--f-${m.fam})">
+    <span class="code">${m.code}</span><span class="lbl">${m.label}</span></button>`).join('');
+  $('modes').querySelectorAll('.mode').forEach(b=>b.onclick=()=>start(b.dataset.mode));
+}
+function stopTimer(){if(timer){clearInterval(timer);timer=null}}
+
+function start(mode){
+  stopTimer(); current=mode; renderModes();
+  if(mode==='all')startAll(); else startQuiz(mode);
+}
+
+/* ---------- Name them all ---------- */
+function startAll(){
+  const LIMIT=12*60; let left=LIMIT, running=false, over=false;
+  const found=new Set();
+  stage.innerHTML=`
+    <div class="bar">
+      <div class="row" style="flex:1;min-width:240px"><input id="nameIn" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Type any element name" aria-label="Element name"></div>
+      <div class="stats"><span><b id="count">0</b> of 118</span><span class="clock" id="clock">12:00</span></div>
+      <button class="btn ghost" id="giveup">Give up</button>
+    </div>
+    <div class="tablewrap"><div class="pt" id="pt"></div></div>
+    <div class="legend">${legend()}</div>
+    <p class="hint">The clock starts on your first letter. Correct names lock in as soon as they're spelled right.</p>`;
+  const pt=$('pt');
+  pt.innerHTML=EL.map(e=>{const[r,c]=position(e.z);
+    return `<div class="cell" id="c${e.z}" style="grid-row:${r};grid-column:${c};--fam:var(--f-${e.fam[0]})"><span class="cn">${e.z}</span><span class="cs"></span></div>`}).join('');
+  const input=$('nameIn'); input.focus();
+  const fmt=s=>`${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`;
+  function finish(){
+    if(over)return; over=true; stopTimer(); input.disabled=true;
+    EL.forEach(e=>{if(!found.has(e.z)){const c=$('c'+e.z);c.classList.add('missed');c.querySelector('.cs').textContent=e.sym}});
+    const best=Math.max(store.get('best:all')||0,found.size); store.set('best:all',best);
+    $('giveup').textContent='Play again'; $('giveup').onclick=()=>start('all');
+    stage.querySelector('.hint').textContent=`You named ${found.size} of 118 with ${fmt(left)} left. Best: ${best}. Missed elements are outlined.`;
+  }
+  input.addEventListener('input',()=>{
+    if(!running){running=true;timer=setInterval(()=>{left--;$('clock').textContent=fmt(left);if(left<=0)finish()},1000)}
+    const n=norm(input.value);
+    const hit=EL.find(e=>!found.has(e.z)&&[e.name,...(ALT[e.z]||[])].map(norm).includes(n));
+    if(hit){
+      found.add(hit.z); input.value='';
+      const c=$('c'+hit.z); c.classList.add('found','pop'); c.querySelector('.cs').textContent=hit.sym;
+      $('count').textContent=found.size;
+      if(found.size===118)finish();
+    }
+  });
+  $('giveup').onclick=finish;
+}
+function legend(){
+  const fams=[['alkali','Alkali metal'],['alkaline','Alkaline earth'],['transition','Transition metal'],['post','Post-transition'],['metalloid','Metalloid'],['nonmetal','Nonmetal'],['halogen','Halogen'],['noble','Noble gas'],['lanthanide','Lanthanide'],['actinide','Actinide']];
+  return fams.map(([k,l])=>`<span style="--sw:var(--f-${k})">${l}</span>`).join('');
+}
+
+/* ---------- Quiz modes ---------- */
+const QCFG={
+  sym:{q:'Which element has this symbol?',ph:'Element name',hide:{name:false,num:false,mass:false},
+    check:(e,v)=>nameMatch(e,v)},
+  num:{q:'Which element has this atomic number?',ph:'Name or symbol',hide:{name:false,sym:false,mass:false},
+    check:(e,v)=>v.trim().toLowerCase()===e.sym.toLowerCase()?'exact':nameMatch(e,v)},
+  z:{q:'What is its atomic number?',ph:'Atomic number',num:true,hide:{num:false,mass:false},
+    check:(e,v)=>parseInt(v,10)===e.z?'exact':null},
+  mass:{q:'Estimate its atomic mass.',ph:'Mass in u, e.g. 35.5',num:true,hide:{mass:false}}
+};
+function massPoints(e,guess){
+  const tol=Math.max(2,e.mass*0.08);
+  return Math.round(100*Math.max(0,1-Math.abs(guess-e.mass)/tol));
+}
+
+function startQuiz(mode){
+  const cfg=QCFG[mode];
+  const deck=shuffle(EL.filter(e=>e.z<=range)).slice(0,QUESTIONS);
+  let i=0, score=0, streak=0, answered=false; const missed=[];
+  const max=mode==='mass'?QUESTIONS*100:QUESTIONS;
+
+  function rangeBar(){
+    return `<div class="seg" role="group" aria-label="Which elements">${RANGES.map(([n,l])=>
+      `<button data-r="${n}" aria-pressed="${n===range}">${l}</button>`).join('')}</div>`;
+  }
+  function bindRange(){
+    stage.querySelectorAll('.seg button').forEach(b=>b.onclick=()=>{range=+b.dataset.r;store.set('range',range);startQuiz(mode)});
+  }
+  function show(){
+    const e=deck[i]; answered=false;
+    stage.innerHTML=`
+      <div class="bar">${rangeBar()}
+        <div class="stats"><span>Question <b>${i+1}</b> of ${QUESTIONS}</span><span>Score <b>${score}</b></span>${mode!=='mass'?`<span>Streak <b>${streak}</b></span>`:''}</div></div>
+      <div class="prompt"><div id="tileSlot">${tile(e,cfg.hide)}</div>
+        <div class="ask"><p class="q">${cfg.q}</p>
+          <div class="row"><input id="ans" ${cfg.num?'inputmode="decimal"':''} autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="${cfg.ph}" aria-label="${cfg.ph}">
+          <button class="btn" id="go">Check</button></div>
+          <p class="fb" id="fb"></p>
+          ${mode==='mass'?'<p class="hint">Scored out of 100 per element. For lighter elements, the mass is roughly twice the atomic number.</p>':''}
+        </div></div>`;
+    bindRange();
+    const input=$('ans'); input.focus();
+    const act=()=>answered?next():submit();
+    $('go').onclick=act;
+    input.addEventListener('keydown',ev=>{if(ev.key==='Enter'){ev.preventDefault();act()}});
+  }
+  function submit(){
+    const e=deck[i], v=$('ans').value; if(!v.trim())return;
+    answered=true; $('ans').readOnly=true; $('go').textContent=i+1<QUESTIONS?'Next':'See results';
+    $('tileSlot').innerHTML=tile(e);
+    const fb=$('fb');
+    if(mode==='mass'){
+      const g=parseFloat(v); const pts=isNaN(g)?0:massPoints(e,g); score+=pts;
+      if(pts<60)missed.push(e);
+      fb.className='fb '+(pts>=60?'good':'bad');
+      fb.textContent=`${e.name} is ${massText(e)} u. You said ${esc(v.trim())}: ${pts} points.`+(e.synthetic?' Bracketed masses are the most stable isotope.':'');
+    }else{
+      const r=cfg.check(e,v);
+      if(r){score++;streak++;fb.className='fb good';
+        fb.textContent=r==='close'?`Correct, spelled ${e.name}.`:`Correct: ${e.name}, ${e.sym}, number ${e.z}.`;}
+      else{streak=0;missed.push(e);fb.className='fb bad';
+        fb.textContent=`It's ${e.name} (${e.sym}), atomic number ${e.z}.`;}
+    }
+    stage.querySelector('.stats').innerHTML=`<span>Question <b>${i+1}</b> of ${QUESTIONS}</span><span>Score <b>${score}</b></span>${mode!=='mass'?`<span>Streak <b>${streak}</b></span>`:''}`;
+    $('go').focus();
+  }
+  function next(){i++; if(i<QUESTIONS)show(); else results()}
+  function results(){
+    const key=`best:${mode}:${range}`; const prev=store.get(key)||0; const best=Math.max(prev,score); store.set(key,best);
+    const label=RANGES.find(r=>r[0]===range)[1];
+    stage.innerHTML=`<div class="bar">${rangeBar()}</div>
+      <div class="result"><p class="big">${score} of ${max}</p>
+      <p class="hint">${score>prev&&prev>0?'New best':'Best'} for elements ${label}: ${best}</p>
+      ${missed.length?`<p style="margin:22px 0 0">${mode==='mass'?'Worth another look':'Missed'}:</p><div class="misses">${missed.map(e=>tile(e)).join('')}</div>`:'<p>No misses. Try a wider range.</p>'}
+      <button class="btn" id="again">Play again</button></div>`;
+    bindRange(); $('again').onclick=()=>startQuiz(mode); $('again').focus();
+  }
+  show();
+}
+
+renderModes();
+stage.innerHTML=`<p style="margin:0;color:var(--muted)">Choose a game above. Quiz games are ten questions each, and you can narrow them to the first 20, 36, or 54 elements while you're learning.</p>`;
+</script>
+</body>
+</html>

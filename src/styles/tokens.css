@@ -1,0 +1,55 @@
+/* Design tokens, from prototype/element-drills.html. Reuse these everywhere. */
+:root {
+  --bg: #e6ecee;
+  --ink: #15232c;
+  --muted: #56666f;
+  --panel: #f7fafb;
+  --line: #c3cfd5;
+  --good: #1d7447;
+  --bad: #b3261e;
+  --focus: #2d5bd7;
+  /* Tile text is always dark ink, in both themes. */
+  --tile-ink: #15232c;
+
+  /* The ten chemical-family colors. Tiles, picker buttons and the table use these. */
+  --f-alkali: #f9b5a7;
+  --f-alkaline: #fad49a;
+  --f-transition: #b9d3ec;
+  --f-post: #bfe0c4;
+  --f-metalloid: #d7c6ee;
+  --f-nonmetal: #f2ec9b;
+  --f-halogen: #9fe1d6;
+  --f-noble: #f4c2de;
+  --f-lanthanide: #d9e6a7;
+  --f-actinide: #e7c3a2;
+
+  --font: 'Bricolage Grotesque', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --bg: #121c23;
+    --ink: #e4ebee;
+    --muted: #95a6af;
+    --panel: #1a262e;
+    --line: #2f3f49;
+    --good: #62ce92;
+    --bad: #ff8a80;
+    --focus: #8fb0ff;
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme='dark'] {
+  --bg: #121c23;
+  --ink: #e4ebee;
+  --muted: #95a6af;
+  --panel: #1a262e;
+  --line: #2f3f49;
+  --good: #62ce92;
+  --bad: #ff8a80;
+  --focus: #8fb0ff;
+  color-scheme: dark;
+}
