@@ -60,11 +60,11 @@ export interface QuizGame extends GameBase {
 }
 
 /**
- * A timed round played through FillRunner: type names freely and the
+ * A timed round played through FillRunner (kind 'fillTable'): type names freely and the
  * periodic table fills in.
  */
-export interface FillGame extends GameBase {
-  kind: 'fill';
+export interface FillTableGame extends GameBase {
+  kind: 'fillTable';
   round: { seconds: number };
   /** Answer checker: the element the current input completes, if any. */
   check(pool: readonly Element[], input: string, found: ReadonlySet<number>): Element | undefined;
@@ -72,9 +72,37 @@ export interface FillGame extends GameBase {
   score(found: ReadonlySet<number>): number;
 }
 
+/** A drop target in a sort round. */
+export interface SortBucket {
+  id: string;
+  label: string;
+  /** Swatch color, and the color a tile takes on once placed here. */
+  color: Family;
+}
+
 /**
- * Every game implements this. `kind` selects the shared runner that
- * plays it. Adding a game that fits an existing runner = one module in
- * src/games/ plus one line in src/games/index.ts.
+ * A sort round played through SortRunner: deal element tiles into a tray in
+ * a neutral color (the tile must not give away the answer), and the player
+ * places each one in a bucket. Placement is judged immediately.
  */
-export type GameDefinition = QuizGame | FillGame;
+export interface SortGame extends GameBase {
+  kind: 'sort';
+  round: { tiles: number };
+  prompt: { instruction: string };
+  /** Which elements may be dealt at all (applied on top of the range). */
+  eligible(e: Element): boolean;
+  /** Every possible bucket, in display order. Buckets with no eligible element in range are hidden. */
+  buckets: readonly SortBucket[];
+  /** Id of the bucket this element belongs in. */
+  bucketOf(e: Element): string;
+  /** Heading above the tiles that needed more than one try. */
+  retryLabel: string;
+}
+
+/**
+ * Every game implements this, discriminated on `kind`. Each kind has its own
+ * config shape and its own screen: App.tsx switches on `kind` exhaustively,
+ * so a new kind without a screen does not compile. Adding a game of an
+ * existing kind = one module in src/games/ plus one line in src/games/index.ts.
+ */
+export type GameDefinition = QuizGame | FillTableGame | SortGame;

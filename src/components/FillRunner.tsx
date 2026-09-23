@@ -1,13 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
 import { ELEMENTS } from '../data/elements';
-import type { FillGame } from '../games/types';
+import type { FillTableGame } from '../games/types';
 import { keys, recordBest } from '../lib/storage';
 import { PeriodicTable } from './PeriodicTable';
 
 const fmt = (s: number) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
 
 interface Props {
-  game: FillGame;
+  game: FillTableGame;
   onRestart: () => void;
 }
 

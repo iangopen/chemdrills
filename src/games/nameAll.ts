@@ -1,12 +1,12 @@
 import { findExactElement } from '../lib/matching';
-import type { FillGame } from './types';
+import type { FillTableGame } from './types';
 
-export const nameAll: FillGame = {
+export const nameAll: FillTableGame = {
   id: 'nameAll',
   title: 'Name them all',
   code: 'All',
   family: 'noble',
-  kind: 'fill',
+  kind: 'fillTable',
   round: { seconds: 12 * 60 },
   // Exact matches only: fuzzy matching would lock in a neighbouring element.
   check: (pool, input, found) => findExactElement(pool, input, found),

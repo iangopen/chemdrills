@@ -10,6 +10,8 @@
   --focus: #2d5bd7;
   /* Tile text is always dark ink, in both themes. */
   --tile-ink: #15232c;
+  /* Tiles whose family must not show yet (Family Sort tray). Light in both themes: tile text is dark ink. */
+  --tile-neutral: #d2dadf;
 
   /* The ten chemical-family colors. Tiles, picker buttons and the table use these. */
   --f-alkali: #f9b5a7;
