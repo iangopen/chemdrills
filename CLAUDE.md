@@ -10,36 +10,16 @@ Read this file in full at the start of every session. Update the Status section 
 - npm scripts MUST be cross-platform. No `rm -rf`, no `export VAR=`, no sh-only syntax. Use `rimraf` or `cross-env`, or Node scripts, if needed. (`a && b` is fine inside npm scripts: npm runs them through `cmd.exe` on Windows.)
 - GitHub account: `iangopenbusinessai-lab`.
 
-## Stack
-
-- Vite 8 + React 19 + TypeScript 6 (`strict`, `noUncheckedIndexedAccess`, `noUnused*`)
-- Vitest for unit tests, Playwright (Chromium) for browser tests
-- ESLint 10 flat config (`eslint.config.js`): typescript-eslint, react-hooks, react-refresh
-- Plain CSS: `src/styles/tokens.css` (tokens) + `src/styles/app.css` (layout/components). No CSS framework.
-- No backend. Persistence is localStorage only.
-
 ## Commands
 
-```
-npm run dev          # local dev server, at http://localhost:5173/chemdrills/ (note the base path)
-npm run build        # tsc -b (strict) + vite build — must pass with zero errors
-npm test             # Vitest unit tests
-npm run lint         # ESLint
-npm run e2e          # Playwright: builds, serves on port 4317, runs e2e/
-npm run e2e:install  # one-time: download Playwright's Chromium
-```
+`npm run dev` serves at http://localhost:5173/chemdrills/ (note the base path). `npm run e2e` builds, serves on port 4317 and runs `e2e/` (run `npm run e2e:install` once first).
 
 The e2e server uses port **4317** with `reuseExistingServer: false` on purpose: another local project serves on Vite's default 4173, and reusing it silently tests the wrong app. Screenshots land in `test-results/screenshots/` (gitignored).
 
 ## Deployment
 
 - **Target: GitHub Pages via GitHub Actions.** Live URL: **https://iangopenbusinessai-lab.github.io/chemdrills/**
-- `.github/workflows/deploy.yml` runs on every push to `main`, and can be rerun by hand (`workflow_dispatch`).
-  - The `build` job: checkout → setup-node (Node from `.nvmrc`, npm cache) → `npm ci` → `npm run build` → configure-pages → upload-pages-artifact (`dist`).
-  - The `deploy` job runs deploy-pages into the `github-pages` environment.
-  - Permissions: `contents: read`, `pages: write`, `id-token: write`. Concurrency group `pages`, with `cancel-in-progress: false`.
-  - Action majors were checked against GitHub's releases on 2026-09-23: checkout@v7, setup-node@v7, configure-pages@v6, upload-pages-artifact@v5, deploy-pages@v5. Re-check (`gh api repos/actions/<name>/releases/latest`) when bumping; don't copy versions from memory.
-  - Validate the workflow with actionlint after any edit.
+- `.github/workflows/deploy.yml` builds and deploys on every push to `main`. **Before editing it, use the `deploy-pages` skill** (job layout, action version pins, actionlint).
 - The workflow **requires Settings → Pages → Source = "GitHub Actions"**. Before this session the repo was on the legacy "Deploy from a branch" (`main`, `/`) source, which publishes the raw repo, not the build.
 - `.nvmrc` (`24`) is the single source for the Node version, locally and in CI. `package-lock.json` must stay committed (`npm ci`).
 
@@ -61,75 +41,9 @@ The site lives at `/chemdrills/`, not `/`.
 
 ## Architecture
 
-```
-src/
-  data/elements.ts       118 typed elements, FAMILIES, ALT_NAMES (single source of truth)
-  lib/matching.ts        pure answer matching (normalize, levenshtein, matchName, ...)
-  lib/scoring.ts         pure mass scoring (massTolerance, massPoints, MASS_MISS_THRESHOLD)
-  lib/quiz.ts            ranges, shuffle, default question generator / scorer / feedback
-  lib/storage.ts         try/catch-wrapped, versioned localStorage helpers
-  lib/famStyle.ts        sets --fam to a family token (inline style)
-  lib/sort.ts            pure sort-round logic: pool, buckets, deal, place, scoring, best (tie-break)
-  lib/useBucketDrag.ts   the drag engine (mouse + touch); see "Drag rules"
-  games/
-    types.ts             GameDefinition = QuizGame | FillTableGame | SortGame
-    index.ts             GAMES registry (order = picker order)
-    nameAll.ts, symbolToName.ts, numberToElement.ts, elementToNumber.ts, guessMass.ts, familySort.ts
-  components/
-    ElementTile.tsx      the core visual: sizes lg/sm/xs, tone family/neutral, optional color override
-    PeriodicTable.tsx    18-col grid + family legend, used by Name Them All
-    ModePicker.tsx       element-cell buttons, one per game
-    RangePicker.tsx      1–20 / 1–36 / 1–54 / All 118
-    QuizRunner.tsx       plays any QuizGame (question → answer → reveal → results)
-    FillRunner.tsx       plays any FillTableGame (timed free typing that fills the table)
-    SortRunner.tsx       plays any SortGame (tray of neutral tiles, buckets, results)
-  App.tsx                picker + stage; exhaustive switch on kind; remounts the runner (via key) to restart
-  styles/tokens.css, styles/app.css
-e2e/                     Playwright specs: games, storage-blocked, visual, sort, sort-touch, sort-visual, deploy
-.github/workflows/deploy.yml   build + deploy to GitHub Pages on push to main
-```
-
-### GameDefinition
-
-Every game is one module exporting a `GameDefinition` (`src/games/types.ts`), a discriminated union on `kind`. Each kind has its own config shape and its own screen. `App.tsx` switches on `kind` with a `never` check, so a new kind without a screen does not compile.
-
-Common fields: `id` (used in storage keys, so never rename a shipped id), `title`, `code` (big text on the picker tile), `family` (picker tile color), `kind`.
-
-- `kind: 'quiz'` → `QuizRunner`. `round: { questions, maxPerQuestion, showStreak }`, plus `prompt` (question text, placeholder, `inputMode`, which tile fields to hide, optional hint), `makeQuestions(pool, count)`, `check(e, input) → Answer`, `score(e, answer) → points`, `isMiss(points)`, `feedback(...)`, `missedLabel`.
-- `kind: 'fillTable'` → `FillRunner`. `round: { seconds }`, `check(pool, input, found) → Element | undefined`, `score(found)`. (Renamed from `'fill'` on 2026-09-23; no behavior change.)
-- `kind: 'sort'` → `SortRunner`. `round: { tiles }`, `prompt: { instruction }`, `eligible(e)` (pool filter on top of the range), `buckets: SortBucket[]` (`{ id, label, color }` in display order), `bucketOf(e) → bucket id`, `retryLabel`. Judging, first-try scoring, the timer and best results are shared in `lib/sort.ts`, not per game.
-
-### How to add a game
-
-1. Pick the kind it fits and create `src/games/myGame.ts` exporting a `QuizGame` / `FillTableGame` / `SortGame`. For quizzes, reuse the helpers in `lib/quiz.ts` (`randomQuestions`, `oneIfCorrect`, `missIfZero`, `identityFeedback`).
-2. Add one line to `GAMES` in `src/games/index.ts`.
-3. Add unit tests for any new pure logic, plus an e2e test.
-
-**Adding a sort game** (say, metals / nonmetals / metalloids) is one file plus one registry line:
-
-```ts
-export const metalSort: SortGame = {
-  id: 'metalSort', title: 'Metal or not', code: 'Me', family: 'post', kind: 'sort',
-  round: { tiles: 12 },
-  prompt: { instruction: 'Metal, metalloid, or nonmetal?' },
-  eligible: isMeasured, // keeps the Z 104+ exclusion
-  buckets: [
-    { id: 'metal', label: 'Metal', color: 'transition' },
-    { id: 'metalloid', label: 'Metalloid', color: 'metalloid' },
-    { id: 'nonmetal', label: 'Nonmetal', color: 'nonmetal' },
-  ],
-  bucketOf: (e) => (e.family === 'metalloid' ? 'metalloid' : NONMETALS.has(e.family) ? 'nonmetal' : 'metal'),
-  retryLabel: 'Needed another try',
-};
-```
-
-A bucket's `color` is a family token, and placed tiles take on the bucket's color. Buckets with no eligible element in the chosen range are hidden automatically.
-
-**Limit, stated honestly:** a game with a genuinely new interaction (equation balancing, multiple choice, ordering) needs a new `kind` in `types.ts`, a new screen component, and a new `case` in `App.tsx`; the compiler insists. After that, further games of that kind are one file + one line again.
+Every game is one module in `src/games/` exporting a `GameDefinition` (discriminated union on `kind`, `src/games/types.ts`), registered in `src/games/index.ts`. A game's `id` is used in storage keys, so **never rename a shipped id**. To add a game, use the **`add-game` skill**.
 
 ### Element data
-
-`Element = { z, symbol, name, mass, massText, synthetic, family, period, group, gridRow, gridCol }`
 
 - `mass` is numeric (used for scoring). `massText` is the display form: IUPAC digits exactly as published, **trailing zeros included** (Ne `20.180`, Te `127.60`). The prototype used `parseFloat` and lost those zeros, which was a display bug.
 - **Mass source:** CIAAW/IUPAC *Abridged Standard Atomic Weights 2024* (ciaaw.org/abridged-atomic-weights.htm), copied digit for digit by script, not retyped. Compared to the prototype, three values changed:
@@ -141,17 +55,7 @@ A bucket's `color` is a family token, and placed tiles take on the bucket's colo
   - Cross-checked against PubChem: 28 of 34 agree. PubChem differs on Tc (97), Mt (277), Ds (282), Cn (286), Fl (290) and Og (295), where "most stable isotope" is contested or recently revised.
 - `group` is `null` for the f-block (La–Lu, Ac–Lr), which sits below the table. `period` for the f-block is 6/7.
 - **ALT_NAMES**: 13 → aluminium, 16 → sulphur, 55 → caesium. Primary names use US spelling.
-- **Families** (these drive tile colors; ids match the `--f-*` tokens):
-  - `alkali`: 3, 11, 19, 37, 55, 87
-  - `alkaline`: 4, 12, 20, 38, 56, 88
-  - `transition`: 21–30, 39–48, 72–80, 104–112
-  - `lanthanide`: 57–71
-  - `actinide`: 89–103
-  - `metalloid`: 5, 14, 32, 33, 51, 52
-  - `nonmetal`: 1, 6, 7, 8, 15, 16, 34
-  - `halogen`: 9, 17, 35, 53, 85, 117
-  - `noble`: 2, 10, 18, 36, 54, 86, 118
-  - `post`: everything else
+- **Families** drive tile colors; ids match the `--f-*` tokens. The list lives in `src/data/elements.ts`.
 - **Grid layout**: standard long-form table, 18 columns. Row 8 is a spacer. La–Lu sit on row 9, cols 3–17, and Ac–Lr on row 10, cols 3–17. The test checks this against a hand-drawn ASCII table, not against the position code.
 
 ### Answer matching rules (`src/lib/matching.ts`)
@@ -186,26 +90,9 @@ Shared quiz behavior:
 
 Deliberate deviation from the prototype: mass guesses accept a decimal comma (`35,5`), because `inputmode="decimal"` shows a comma key on some locales' keyboards.
 
-## Drag rules (apply to any drag interaction in this project)
+## Drag rules
 
-Hard-won in an earlier project's touch drag, and not negotiable. They're implemented in `src/lib/useBucketDrag.ts`.
-
-1. **No Pointer Events and no `setPointerCapture`.** That model was abandoned after real pain.
-2. **One coordinate core**: `startDragAt(tile, x, y)` → `moveTo(x, y)` → `endDrag(drop)`. Thin mouse and touch wrappers only extract coordinates. Rendering and drop logic are shared, never duplicated per input type.
-3. **`touchmove`, `touchend` and `touchcancel` are native `document.addEventListener` calls with `{ passive: false }`.** React's root touch listeners are passive, so `preventDefault` inside `onTouchMove` silently fails. `onTouchStart` can stay a React prop.
-4. **Hit-test with `document.elementFromPoint` only while moving** (touch has implicit capture). Resolve it with `.closest('[data-bucket]')` and store it in a ref **synchronously**. The drop reads that ref, never React state and never a fresh hit-test at touchend. (Stale hover state caused a real drop-target race before.) React state mirrors the ref only to highlight the hovered bucket.
-5. **Follow the initiating touch's `identifier`.** Find it in `changedTouches`, and never index `touches[0]`. A second finger can't start, move or end the drag.
-6. **Handle `touchcancel`**: end without judging (back to the tray, not a mistake) and restore `body.style.userSelect` and `cursor`. Unmounting mid-drag also restores them.
-7. **After any touch ends, ignore mouse events for ~500ms** (`MOUSE_IGNORE_MS`), because browsers synthesize mouse events after touchend, which would start or drop a tile twice. `touchend` also calls `preventDefault`. Click handlers ignore pointer clicks (`detail > 0`) inside the window, but keyboard clicks (`detail === 0`) always count.
-8. **`touch-action: none` on draggable tiles only**, so the page still scrolls when a finger starts anywhere else.
-9. **The touch preview sits above the finger** (`TOUCH_PREVIEW_GAP`), not centered under it. The mouse preview keeps the grab point.
-10. **A drop outside every target** returns the item and is not a mistake.
-11. **Movement under `DRAG_THRESHOLD` (8px) is a tap**, meaning selection, not a drag. A touch tap selects in the touchend handler, and a mouse tap is left to `onClick`. After a real mouse drag, the click that follows is suppressed.
-12. **Tap-to-place works with no drag code at all.** Selection and placement live in `onClick` (keyboard, mouse click, screen readers). Drag is an extra path, never the only one.
-
-Checked by mutation testing:
-- Removing the 500ms window, following `touches[0]`, or skipping the body-style restore each makes a touch e2e test fail.
-- Making touchmove passive is caught only by the console-error check (Chromium logs "Unable to preventDefault inside passive event listener"). The page itself didn't misbehave, because `touch-action: none` on the tiles already blocks scrolling in Chromium. Keep `passive: false` anyway: it's the defense for browsers whose touch-action support differs.
+Any drag interaction in this project must follow the non-negotiable drag rules in `src/lib/CLAUDE.md` (no Pointer Events, no `setPointerCapture`; one coordinate core; tap-to-place must always work). Read that file before touching drag code.
 
 ## Design rules
 
@@ -322,7 +209,7 @@ Checked by mutation testing:
 - **Screen readers**: not tested with NVDA or VoiceOver. The aria labels and live regions are written but unheard.
 - **Dev mode**: e2e runs against the production build (`vite preview`). `npm run dev` with React StrictMode isn't exercised by automated tests.
 - **Accounts or leaderboards**: deliberately out of scope for now.
-- **Roadmap games** (not started, not yet specced; see "How to add a game"):
+- **Roadmap games** (not started, not yet specced; see the `add-game` skill):
   - other sort games (e.g. metals / nonmetals / metalloids): should be one file + one line now
   - electron configuration
   - periodic-trend "which is bigger" (radius, electronegativity)
