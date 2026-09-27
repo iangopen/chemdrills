@@ -11,6 +11,13 @@ export default defineConfig({
   testDir: './e2e',
   outputDir: './test-results',
   fullyParallel: true,
+  // Capped on purpose. The default (half the logical CPUs: 10 on the dev
+  // machine) starves the one `vite preview` server and the renderers: page
+  // loads never get a response, and Playwright's "stable" check never sees two
+  // animation frames (the Family Sort bucket-click timeouts). Measured
+  // 2026-09-26, sort specs x15: 13/150 and 9/150 (baseline commit) failed at
+  // the default, 0/150 at 4. Don't raise timeouts instead.
+  workers: 4,
   reporter: 'list',
   use: {
     baseURL: BASE_URL,

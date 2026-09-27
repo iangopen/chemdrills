@@ -66,17 +66,21 @@ input {
 }
 
 /* Mode picker: each game is an element cell */
+/* A grid that fills the row: eight games fit one row at full width (1040px of
+   content), and columns drop as the screen narrows. */
 .modes {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(116px, 1fr));
   gap: 10px;
   margin-bottom: 28px;
 }
 .mode {
   all: unset;
+  /* all: unset also resets box-sizing to content-box; without this the padding
+     and border add 24px to every tile (that is what wrapped the picker). */
+  box-sizing: border-box;
   cursor: pointer;
-  width: 112px;
-  min-height: 112px;
+  min-height: 116px;
   border: 2px solid var(--ink);
   border-radius: 6px;
   padding: 8px 10px;
@@ -416,8 +420,10 @@ input {
   .stage {
     padding: 16px;
   }
+  .modes {
+    grid-template-columns: repeat(3, 1fr);
+  }
   .mode {
-    width: calc(33.3% - 7px);
     min-height: 96px;
   }
   .tile {
