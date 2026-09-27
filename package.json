@@ -14,7 +14,8 @@
     "e2e:install": "playwright install chromium",
     "gen:sql": "vitest run src/lib/sqlParity.test.ts -u",
     "test:rpc": "vitest run --config vitest.rpc.config.ts",
-    "check:secrets": "node scripts/check-dist-secrets.mjs"
+    "check:secrets": "node scripts/check-dist-secrets.mjs",
+    "test:sql": "node supabase/tests/local-postgres.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.117.2",
@@ -22,6 +23,7 @@
     "react-dom": "^19.3.0"
   },
   "devDependencies": {
+    "@electric-sql/pglite": "^0.5.8",
     "@eslint/js": "^10.0.1",
     "@playwright/test": "^1.63.0",
     "@types/node": "^26.6.2",

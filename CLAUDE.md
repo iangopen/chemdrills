@@ -8,7 +8,7 @@ Read this file in full at the start of every session. Update the Status section 
 
 - The developer works on **Windows / PowerShell** and in TypeScript/React.
 - npm scripts MUST be cross-platform. No `rm -rf`, no `export VAR=`, no sh-only syntax. Use `rimraf` or `cross-env`, or Node scripts, if needed. (`a && b` is fine inside npm scripts: npm runs them through `cmd.exe` on Windows.)
-- GitHub account: `iangopenbusinessai-lab`.
+- GitHub account: `iangopen` (renamed from `iangopenbusinessai-lab` on 2026-09-26).
 
 ## Commands
 
@@ -18,7 +18,7 @@ The e2e server uses port **4317** with `reuseExistingServer: false` on purpose: 
 
 ## Deployment
 
-- **Target: GitHub Pages via GitHub Actions.** Live URL: **https://iangopenbusinessai-lab.github.io/chemdrills/**
+- **Target: GitHub Pages via GitHub Actions.** Live URL: **https://iangopen.github.io/chemdrills/**
 - `.github/workflows/deploy.yml` builds and deploys on every push to `main`. **Before editing it, use the `deploy-pages` skill** (job layout, action version pins, actionlint).
 - The workflow **requires Settings → Pages → Source = "GitHub Actions"**. Before this session the repo was on the legacy "Deploy from a branch" (`main`, `/`) source, which publishes the raw repo, not the build.
 - `.nvmrc` (`24`) is the single source for the Node version, locally and in CI. `package-lock.json` must stay committed (`npm ci`).
@@ -199,7 +199,7 @@ Any drag interaction in this project must follow the non-negotiable drag rules i
 - **Masses**: all 84 elements with a standard weight match CIAAW 2024 abridged. The 34 synthetic ones were cross-checked against PubChem, with the differences noted above.
 
 ### Open
-- **Live deploy: NOT verified.** The workflow has never run on GitHub, and nothing has been loaded from https://iangopenbusinessai-lab.github.io/chemdrills/. This stays open until the developer confirms the live site loads on their phone. Remaining manual steps:
+- **Live deploy: NOT verified.** The workflow has never run on GitHub, and nothing has been loaded from https://iangopen.github.io/chemdrills/. This stays open until the developer confirms the live site loads on their phone. Remaining manual steps:
   1. Settings → Pages → Source: switch from "Deploy from a branch" to **GitHub Actions**. (The repo is already public.)
   2. Push `main`.
   3. Watch the Actions tab: "Deploy to GitHub Pages" should pass both `build` and `deploy`.

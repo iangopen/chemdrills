@@ -1,4 +1,4 @@
-# Build and deploy to GitHub Pages: https://iangopenbusinessai-lab.github.io/chemdrills/
+# Build and deploy to GitHub Pages: https://iangopen.github.io/chemdrills/
 # Requires Settings → Pages → Source = "GitHub Actions".
 name: Deploy to GitHub Pages
 
