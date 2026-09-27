@@ -664,3 +664,170 @@ input {
     transform: none;
   }
 }
+
+/* ---- Accounts and leaderboards ---- */
+/* Phones: below the picker. Wider: top-right beside the heading, so the stage
+   doesn't move down (DOM order stays after the picker, the first Tab stop). */
+.account-bar {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 10px;
+  margin: -12px 0 16px;
+}
+.account-bar .btn {
+  padding: 8px 14px;
+  font-size: 15px;
+}
+@media (min-width: 561px) {
+  main {
+    position: relative;
+  }
+  .account-bar {
+    position: absolute;
+    top: 32px;
+    right: 20px;
+    margin: 0;
+  }
+}
+.account-bar .btn[aria-pressed='true'] {
+  border-color: var(--ink);
+}
+.btn[disabled] {
+  opacity: 0.6;
+  cursor: default;
+}
+.stage h2 {
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin: 0 0 12px;
+}
+.account {
+  max-width: 34rem;
+}
+.account p {
+  margin: 0 0 14px;
+}
+.muted {
+  color: var(--muted);
+}
+.field {
+  display: grid;
+  gap: 6px;
+  margin: 0 0 14px;
+  font-weight: 600;
+}
+.field input {
+  min-width: 0;
+  padding: 12px 14px;
+  border: 2px solid var(--line);
+  border-radius: 8px;
+  background: var(--bg);
+  font-size: 19px;
+  font-weight: 400;
+}
+.field input:focus {
+  border-color: var(--ink);
+  outline: none;
+}
+.field input:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+.account .hint {
+  margin: -8px 0 12px;
+}
+.check {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 18px;
+}
+.check input {
+  width: 22px;
+  height: 22px;
+  accent-color: var(--ink);
+}
+.row-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.submit-box {
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+}
+.submit-box p {
+  margin: 0 0 12px;
+}
+.submit-status:empty {
+  display: none;
+}
+#next b {
+  color: var(--ink);
+}
+.board-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0 0 14px;
+}
+.board-tab {
+  all: unset;
+  cursor: pointer;
+  padding: 8px 14px;
+  border: 2px solid var(--tile-ink);
+  border-radius: 6px;
+  background: var(--fam);
+  color: var(--tile-ink);
+  font-weight: 600;
+  font-size: 15px;
+}
+.board-tab[aria-selected='true'] {
+  box-shadow:
+    0 0 0 3px var(--panel),
+    0 0 0 5px var(--ink);
+}
+.board-tab:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 4px;
+}
+#boardPanel {
+  margin: 16px 0 0;
+}
+.board-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+}
+.board-table th,
+.board-table td {
+  text-align: left;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--line);
+}
+.board-table th {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.board-table td:first-child {
+  width: 3.5em;
+  font-weight: 800;
+}
+.board-table td:nth-child(2) {
+  overflow-wrap: anywhere;
+}
+.board-table tr.me td {
+  background: color-mix(in srgb, var(--f-noble) 45%, transparent);
+  font-weight: 700;
+}
+.board-gap td {
+  text-align: center;
+  color: var(--muted);
+  padding: 2px;
+}

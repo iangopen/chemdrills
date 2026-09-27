@@ -6,6 +6,8 @@ const PREFIX = 'eldrills:v1:';
 export const keys = {
   best: (gameId: string, range: number) => `best:${gameId}:${range}`,
   bestNameAll: () => 'best:nameAll',
+  /** Ordered fill games (Name In Order, Reverse Order): fastest full run, in ms. */
+  bestTimeMs: (gameId: string) => `best:${gameId}`,
   range: () => 'range',
 } as const;
 
@@ -38,6 +40,14 @@ export function readNumber(key: string): number | null {
 export function recordBest(key: string, score: number): { prev: number; best: number } {
   const prev = readNumber(key) ?? 0;
   const best = Math.max(prev, score);
+  writeJSON(key, best);
+  return { prev, best };
+}
+
+/** Save `ms` if it beats the stored fastest time. Lower is better; null = no previous time. */
+export function recordFastest(key: string, ms: number): { prev: number | null; best: number } {
+  const prev = readNumber(key);
+  const best = prev === null ? ms : Math.min(prev, ms);
   writeJSON(key, best);
   return { prev, best };
 }

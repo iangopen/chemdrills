@@ -17,7 +17,8 @@ export default defineConfig({
     ...devices['Desktop Chrome'],
   },
   webServer: {
-    command: `npm run build && npm run preview -- --port ${PORT} --strictPort`,
+    // --mode e2e loads .env.e2e: a fake Supabase URL the specs mock (never a real project).
+    command: `npm run build -- --mode e2e && npm run preview -- --port ${PORT} --strictPort`,
     url: BASE_URL,
     reuseExistingServer: false,
     timeout: 120_000,

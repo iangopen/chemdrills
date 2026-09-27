@@ -8,6 +8,7 @@ export const nameAll: FillTableGame = {
   family: 'noble',
   kind: 'fillTable',
   round: { seconds: 12 * 60 },
+  ranked: true,
   // Exact matches only: fuzzy matching would lock in a neighbouring element.
   check: (pool, input, found) => findExactElement(pool, input, found),
   score: (found) => found.size,

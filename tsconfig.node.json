@@ -15,5 +15,5 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true
   },
-  "include": ["vite.config.ts", "playwright.config.ts", "e2e"]
+  "include": ["vite.config.ts", "vitest.rpc.config.ts", "playwright.config.ts", "e2e", "supabase/tests"]
 }

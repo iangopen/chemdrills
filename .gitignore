@@ -4,3 +4,6 @@ test-results
 playwright-report
 *.tsbuildinfo
 .DS_Store
+# Local env (Supabase config, RPC test credentials). Never commit.
+.env
+*.local

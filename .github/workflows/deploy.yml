@@ -31,7 +31,16 @@ jobs:
       - run: npm ci
 
       # tsc -b (strict) + vite build, with base '/chemdrills/' (vite.config.ts).
+      # Supabase URL + anon key only (they ship in the public bundle). If the
+      # secrets are missing the build still succeeds, with accounts hidden.
+      # NEVER add the service_role / sb_secret_ key here.
       - run: npm run build
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+
+      # Refuse to deploy a bundle holding anything but the anon key.
+      - run: npm run check:secrets
 
       - uses: actions/configure-pages@v6
 

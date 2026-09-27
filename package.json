@@ -11,9 +11,13 @@
     "test:watch": "vitest",
     "lint": "eslint .",
     "e2e": "playwright test",
-    "e2e:install": "playwright install chromium"
+    "e2e:install": "playwright install chromium",
+    "gen:sql": "vitest run src/lib/sqlParity.test.ts -u",
+    "test:rpc": "vitest run --config vitest.rpc.config.ts",
+    "check:secrets": "node scripts/check-dist-secrets.mjs"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.117.2",
     "react": "^19.3.0",
     "react-dom": "^19.3.0"
   },

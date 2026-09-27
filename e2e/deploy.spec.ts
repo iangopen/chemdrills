@@ -23,7 +23,7 @@ test('the app loads under the base path with every asset from it', async ({ page
   expect(new URL(page.url()).pathname).toBe(BASE_PATH);
 
   await expect(page.locator('h1')).toHaveText('Element Drills');
-  await expect(page.locator('.mode')).toHaveCount(6);
+  await expect(page.locator('.mode')).toHaveCount(8);
   await page.evaluate(() => document.fonts.ready);
   expect(await page.evaluate(() => document.fonts.check('800 20px "Bricolage Grotesque"'))).toBe(true);
 

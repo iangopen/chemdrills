@@ -1,5 +1,6 @@
 import type { Element, Family } from '../data/elements';
 import type { MatchResult } from '../lib/matching';
+import type { Order } from '../lib/sequence';
 
 /** Which tile fields a prompt shows. A field set to false is hidden ("?"). */
 export interface TileMask {
@@ -65,7 +66,21 @@ export interface QuizGame extends GameBase {
  */
 export interface FillTableGame extends GameBase {
   kind: 'fillTable';
+  /** Time limit. Any-order games count down from it; ordered games count up to it. */
   round: { seconds: number };
+  /**
+   * Absent: names in any order, scored by count (Name Them All). 'asc' / 'desc':
+   * only the next element in sequence is accepted, the clock counts up, and the
+   * result is the time to name all 118. Give up or time-out ends it unranked.
+   */
+  order?: Order;
+  /**
+   * On the leaderboard. The id and limits must match a row in
+   * supabase ranked_games (checked by src/lib/sqlParity.test.ts).
+   */
+  ranked?: boolean;
+  /** Input placeholder. */
+  placeholder?: string;
   /** Answer checker: the element the current input completes, if any. */
   check(pool: readonly Element[], input: string, found: ReadonlySet<number>): Element | undefined;
   /** Scorer: final score for a finished round. */

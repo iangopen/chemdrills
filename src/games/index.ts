@@ -2,7 +2,9 @@ import { elementToNumber } from './elementToNumber';
 import { familySort } from './familySort';
 import { guessMass } from './guessMass';
 import { nameAll } from './nameAll';
+import { nameInOrder } from './nameInOrder';
 import { numberToElement } from './numberToElement';
+import { reverseOrder } from './reverseOrder';
 import { symbolToName } from './symbolToName';
 import type { GameDefinition } from './types';
 
@@ -14,6 +16,8 @@ export const GAMES: readonly GameDefinition[] = [
   elementToNumber,
   guessMass,
   familySort,
+  nameInOrder,
+  reverseOrder,
 ];
 
 export function gameById(id: string): GameDefinition | undefined {
