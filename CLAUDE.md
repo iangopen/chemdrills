@@ -18,7 +18,8 @@ The e2e server uses port **4317** with `reuseExistingServer: false` on purpose: 
 
 ## Deployment
 
-- **Target: GitHub Pages via GitHub Actions.** Live URL: **https://iangopenbusinessai-lab.github.io/chemdrills/**
+- **Target: GitHub Pages via GitHub Actions.** Live URL: **https://iangopen.github.io/chemdrills/**
+- **Runner pin (2026-10-27):** both jobs run on `ubuntu-24.04`, not `ubuntu-latest` (which moves to Ubuntu 26.04 between 2026-10-19 and 2026-11-19); bump it deliberately. Node comes from `.nvmrc` (24), `npm ci`, and the actions are already at their current majors (checkout@v7, setup-node@v7, configure-pages@v6, upload-pages-artifact@v5, deploy-pages@v5); the `pages` concurrency group with `cancel-in-progress: false` was already in place. Verified on run 40456350590 (commit `906c630`): both jobs green, image ubuntu-24.04, 0 annotations, CI Node v24.21.0, and the deployed `index-BZS0DdsV.js` / `index-C1TcQBRI.css` match a local `npm ci` build (only CRLF in `index.html` differs, from autocrlf on Windows). This workflow builds only; it runs no tests. **Restore the previous workflow** (the commit before the change is `25e076d`): `git checkout 25e076d -- .github/workflows/deploy.yml`, then commit and push. The unmerged `accounts-leaderboard` branch edits this file too, so expect a small conflict on the `runs-on` lines when it merges.
 - `.github/workflows/deploy.yml` builds and deploys on every push to `main`. **Before editing it, use the `deploy-pages` skill** (job layout, action version pins, actionlint).
 - The workflow **requires Settings → Pages → Source = "GitHub Actions"**. Before this session the repo was on the legacy "Deploy from a branch" (`main`, `/`) source, which publishes the raw repo, not the build.
 - `.nvmrc` (`24`) is the single source for the Node version, locally and in CI. `package-lock.json` must stay committed (`npm ci`).
