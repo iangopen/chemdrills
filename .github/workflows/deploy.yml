@@ -1,4 +1,4 @@
-# Build and deploy to GitHub Pages: https://iangopenbusinessai-lab.github.io/chemdrills/
+# Build and deploy to GitHub Pages: https://iangopen.github.io/chemdrills/
 # Requires Settings → Pages → Source = "GitHub Actions".
 name: Deploy to GitHub Pages
 
@@ -19,7 +19,10 @@ concurrency:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    # Pinned, not ubuntu-latest, so a new default image (Ubuntu 26.04 from
+    # 2026-10-19) can't change the deploy by surprise. Bumping it is a
+    # deliberate step (see CLAUDE.md, Deployment).
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v7
 
@@ -41,7 +44,7 @@ jobs:
 
   deploy:
     needs: build
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
